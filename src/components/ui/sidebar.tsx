@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
+import { Slot } from "@radix-ui/react-slot"
 
 interface SidebarContextProps {
   open: boolean
@@ -118,7 +119,7 @@ export interface SidebarTriggerProps extends React.ButtonHTMLAttributes<HTMLButt
 export function SidebarTrigger({ className, asChild, ...props }: SidebarTriggerProps) {
   const { open, onOpenChange } = useSidebarContext()
   
-  const Comp = asChild ? React.Slot : Button
+  const Comp = asChild ? Slot : Button
   
   return (
     <Comp

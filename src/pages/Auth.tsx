@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import AnimatedSection from "@/components/AnimatedSection";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, ArrowLeft, User, Mail, Lock, GitHub } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, User, Mail, Lock, Github } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -212,7 +211,7 @@ const Auth = () => {
                 Google
               </Button>
               <Button variant="outline" className="w-full bg-background hover:bg-accent">
-                <GitHub size={20} className="mr-2" />
+                <Github size={20} className="mr-2" />
                 GitHub
               </Button>
             </div>
