@@ -46,12 +46,16 @@ const NavBar = () => {
         </nav>
         
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="hidden md:inline-flex" as={Link} to="/auth">
-            Login
-          </Button>
-          <Button className="animate-scale-in" as={Link} to="/auth">
-            Get Started
-          </Button>
+          <Link to="/auth">
+            <Button variant="ghost" size="sm" className="hidden md:inline-flex">
+              Login
+            </Button>
+          </Link>
+          <Link to="/auth">
+            <Button className="animate-scale-in">
+              Get Started
+            </Button>
+          </Link>
         </div>
       </div>
     </header>

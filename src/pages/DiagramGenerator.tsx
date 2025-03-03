@@ -11,18 +11,19 @@ import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { MermaidDiagram } from "@/components/MermaidDiagram";
 import GeneratorSidebar from "@/components/GeneratorSidebar";
+import { Textarea } from "@/components/ui/textarea";
 
 // Mock conversation for initial state
 const initialConversation = [
   {
     id: "1",
-    type: "user",
+    type: "user" as const,
     content: "graph TD;\n    A[Client] --> B[Load Balancer];\n    B --> C[Server1];\n    B --> D[Server2];",
     timestamp: new Date().toISOString(),
   },
   {
     id: "2",
-    type: "assistant",
+    type: "assistant" as const,
     content: "graph TD;\n    A[Client] --> B[Load Balancer];\n    B --> C[Server1];\n    B --> D[Server2];",
     timestamp: new Date().toISOString(),
   }
@@ -45,7 +46,7 @@ const DiagramGenerator = () => {
     // Add user message
     const userMessage = {
       id: Date.now().toString(),
-      type: "user",
+      type: "user" as const,
       content: input,
       timestamp: new Date().toISOString(),
     };
@@ -57,7 +58,7 @@ const DiagramGenerator = () => {
     setTimeout(() => {
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        type: "assistant",
+        type: "assistant" as const,
         content: input, // In a real implementation, this would be the AI-generated diagram
         timestamp: new Date().toISOString(),
       };
@@ -242,12 +243,11 @@ const DiagramGenerator = () => {
         <div className="border-t p-4 bg-background">
           <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
             <div className="relative">
-              <Input
+              <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Enter Mermaid.js diagram code..."
                 className="pr-20 py-6 min-h-24 resize-none"
-                multiline="true"
               />
               <Button 
                 type="submit" 
