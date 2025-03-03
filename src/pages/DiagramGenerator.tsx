@@ -1,0 +1,275 @@
+
+import React, { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { 
+  ZoomIn, ZoomOut, Download, Copy, 
+  Send, Trash2, Settings, ChevronLeft, 
+  Menu, MessageSquare, Save
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { MermaidDiagram } from "@/components/MermaidDiagram";
+import GeneratorSidebar from "@/components/GeneratorSidebar";
+
+// Mock conversation for initial state
+const initialConversation = [
+  {
+    id: "1",
+    type: "user",
+    content: "graph TD;\n    A[Client] --> B[Load Balancer];\n    B --> C[Server1];\n    B --> D[Server2];",
+    timestamp: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    type: "assistant",
+    content: "graph TD;\n    A[Client] --> B[Load Balancer];\n    B --> C[Server1];\n    B --> D[Server2];",
+    timestamp: new Date().toISOString(),
+  }
+];
+
+const DiagramGenerator = () => {
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversation, setConversation] = useState(initialConversation);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { toast } = useToast();
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    
+    // Add user message
+    const userMessage = {
+      id: Date.now().toString(),
+      type: "user",
+      content: input,
+      timestamp: new Date().toISOString(),
+    };
+    
+    setConversation(prev => [...prev, userMessage]);
+    setIsLoading(true);
+    
+    // Simulate AI response (in a real app, you'd call your API here)
+    setTimeout(() => {
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        type: "assistant",
+        content: input, // In a real implementation, this would be the AI-generated diagram
+        timestamp: new Date().toISOString(),
+      };
+      
+      setConversation(prev => [...prev, aiMessage]);
+      setInput("");
+      setIsLoading(false);
+      
+      // Scroll to the bottom after new message
+      setTimeout(() => {
+        endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }, 1500);
+  };
+  
+  const handleCopyDiagram = (diagramCode: string) => {
+    navigator.clipboard.writeText(diagramCode);
+    toast({
+      title: "Copied to clipboard",
+      description: "Diagram code has been copied to your clipboard.",
+    });
+  };
+  
+  const handleDownloadDiagram = () => {
+    // In a real implementation, you would generate SVG or PNG download
+    toast({
+      title: "Download started",
+      description: "Your diagram is being downloaded.",
+    });
+  };
+  
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  };
+  
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
+  };
+  
+  const handleClearConversation = () => {
+    setConversation([]);
+    toast({
+      title: "Conversation cleared",
+      description: "All messages have been removed.",
+    });
+  };
+  
+  return (
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Sidebar */}
+      <GeneratorSidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)}
+        conversation={conversation}
+        onClearConversation={handleClearConversation}
+      />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Header */}
+        <header className="border-b p-4 flex items-center justify-between bg-background/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden"
+            >
+              <Menu size={20} />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-semibold">S</span>
+              </div>
+              <span className="font-medium text-lg">Simplify Diagrams</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleClearConversation}>
+              <Trash2 size={16} className="mr-1" />
+              Clear
+            </Button>
+            <Button variant="outline" size="sm">
+              <Save size={16} className="mr-1" />
+              Save
+            </Button>
+            <Button variant="outline" size="sm">
+              <Settings size={16} />
+            </Button>
+          </div>
+        </header>
+        
+        {/* Messages Container */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {conversation.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center p-8">
+              <MessageSquare size={48} className="text-muted-foreground/50 mb-4" />
+              <h3 className="text-2xl font-medium mb-2">Start Creating Diagrams</h3>
+              <p className="text-muted-foreground max-w-md">
+                Enter Mermaid.js code in the input below to generate beautiful workflow diagrams.
+              </p>
+            </div>
+          ) : (
+            conversation.map((message, index) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div className={`max-w-3xl rounded-lg p-4 ${
+                  message.type === "user" 
+                    ? "bg-primary/10 ml-12" 
+                    : "bg-card border mr-12"
+                }`}>
+                  {message.type === "user" ? (
+                    <div>
+                      <div className="text-sm font-medium mb-2">You</div>
+                      <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 bg-muted rounded">
+                        {message.content}
+                      </pre>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-sm font-medium mb-2">Assistant</div>
+                      <div className="mb-3">
+                        <MermaidDiagram 
+                          code={message.content} 
+                          zoomLevel={zoomLevel}
+                          panOffset={panOffset}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleZoomIn()}
+                          >
+                            <ZoomIn size={14} />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleZoomOut()}
+                          >
+                            <ZoomOut size={14} />
+                          </Button>
+                          <span className="text-xs text-muted-foreground mx-1">
+                            {Math.round(zoomLevel * 100)}%
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleCopyDiagram(message.content)}
+                          >
+                            <Copy size={14} />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={handleDownloadDiagram}
+                          >
+                            <Download size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))
+          )}
+          <div ref={endOfMessagesRef} />
+        </div>
+        
+        {/* Input Area */}
+        <div className="border-t p-4 bg-background">
+          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+            <div className="relative">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Enter Mermaid.js diagram code..."
+                className="pr-20 py-6 min-h-24 resize-none"
+                multiline="true"
+              />
+              <Button 
+                type="submit" 
+                className="absolute right-1 bottom-1 h-10"
+                disabled={isLoading || !input.trim()}
+              >
+                {isLoading ? "Generating..." : (
+                  <>
+                    <Send size={16} className="mr-2" />
+                    Generate
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              <span>Tip: Start with graph TD, flowchart LR, or sequenceDiagram to create different diagram types.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DiagramGenerator;
