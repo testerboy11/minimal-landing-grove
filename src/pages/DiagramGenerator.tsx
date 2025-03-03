@@ -3,15 +3,23 @@ import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { 
   ZoomIn, ZoomOut, Download, Copy, 
-  Send, Trash2, Settings, ChevronLeft, 
-  Menu, MessageSquare, Save
+  Send, Trash2, Settings, Home,  
+  Menu, MessageSquare, Save, History,
+  ChevronLeft, ChevronRight, Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Input } from "@/components/ui/input";
-import { MermaidDiagram } from "@/components/MermaidDiagram";
-import GeneratorSidebar from "@/components/GeneratorSidebar";
 import { Textarea } from "@/components/ui/textarea";
+import { MermaidDiagram } from "@/components/MermaidDiagram";
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader, 
+  SidebarFooter,
+  SidebarTrigger,
+  SidebarProvider
+} from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
 
 // Mock conversation for initial state
 const initialConversation = [
@@ -35,7 +43,6 @@ const DiagramGenerator = () => {
   const [conversation, setConversation] = useState(initialConversation);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   
@@ -106,169 +113,272 @@ const DiagramGenerator = () => {
     });
   };
   
-  return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
-      <GeneratorSidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)}
-        conversation={conversation}
-        onClearConversation={handleClearConversation}
-      />
+  const AppSidebar = () => (
+    <Sidebar className="border-r">
+      <SidebarHeader className="px-4 py-3 border-b">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-semibold">S</span>
+          </div>
+          <span className="font-medium text-lg">Simplify Diagrams</span>
+        </div>
+      </SidebarHeader>
       
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Header */}
-        <header className="border-b p-4 flex items-center justify-between bg-background/80 backdrop-blur-sm">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden"
-            >
-              <Menu size={20} />
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-semibold">S</span>
+      <SidebarContent className="px-4 py-4">
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
+              <History size={16} />
+              Recent Conversations
+            </h3>
+            
+            {conversation.length > 0 ? (
+              <div className="space-y-2">
+                {conversation
+                  .filter(msg => msg.type === "assistant")
+                  .slice(-5)
+                  .map((msg) => (
+                    <div 
+                      key={msg.id} 
+                      className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                      <MessageSquare size={12} />
+                      <div className="truncate flex-1">
+                        {msg.content.substring(0, 30)}...
+                      </div>
+                      <ChevronRight size={12} />
+                    </div>
+                  ))}
               </div>
-              <span className="font-medium text-lg">Simplify Diagrams</span>
+            ) : (
+              <div className="text-xs text-muted-foreground">
+                No conversation history yet.
+              </div>
+            )}
+            
+            {conversation.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-2 text-xs h-8"
+                onClick={handleClearConversation}
+              >
+                Clear History
+              </Button>
+            )}
+          </div>
+          
+          <div>
+            <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
+              <Settings size={16} />
+              Settings
+            </h3>
+            
+            <div className="space-y-2">
+              <div className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer">
+                Theme Preferences
+              </div>
+              <div className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer">
+                Diagram Display Options
+              </div>
+              <div className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer">
+                Download Format
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleClearConversation}>
-              <Trash2 size={16} className="mr-1" />
-              Clear
-            </Button>
-            <Button variant="outline" size="sm">
-              <Save size={16} className="mr-1" />
-              Save
-            </Button>
-            <Button variant="outline" size="sm">
-              <Settings size={16} />
-            </Button>
-          </div>
-        </header>
-        
-        {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {conversation.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8">
-              <MessageSquare size={48} className="text-muted-foreground/50 mb-4" />
-              <h3 className="text-2xl font-medium mb-2">Start Creating Diagrams</h3>
-              <p className="text-muted-foreground max-w-md">
-                Enter Mermaid.js code in the input below to generate beautiful workflow diagrams.
-              </p>
+          <div>
+            <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
+              <Info size={16} />
+              Help & Resources
+            </h3>
+            
+            <div className="space-y-2">
+              <div className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer">
+                Mermaid.js Documentation
+              </div>
+              <div className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer">
+                Diagram Examples
+              </div>
+              <div className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer">
+                Keyboard Shortcuts
+              </div>
             </div>
-          ) : (
-            conversation.map((message, index) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div className={`max-w-3xl rounded-lg p-4 ${
-                  message.type === "user" 
-                    ? "bg-primary/10 ml-12" 
-                    : "bg-card border mr-12"
-                }`}>
-                  {message.type === "user" ? (
-                    <div>
-                      <div className="text-sm font-medium mb-2">You</div>
-                      <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 bg-muted rounded">
-                        {message.content}
-                      </pre>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="text-sm font-medium mb-2">Assistant</div>
-                      <div className="mb-3">
-                        <MermaidDiagram 
-                          code={message.content} 
-                          zoomLevel={zoomLevel}
-                          panOffset={panOffset}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleZoomIn()}
-                          >
-                            <ZoomIn size={14} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleZoomOut()}
-                          >
-                            <ZoomOut size={14} />
-                          </Button>
-                          <span className="text-xs text-muted-foreground mx-1">
-                            {Math.round(zoomLevel * 100)}%
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleCopyDiagram(message.content)}
-                          >
-                            <Copy size={14} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={handleDownloadDiagram}
-                          >
-                            <Download size={14} />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))
-          )}
-          <div ref={endOfMessagesRef} />
+          </div>
         </div>
+      </SidebarContent>
+      
+      <SidebarFooter className="px-4 py-3 border-t">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-semibold text-xs">S</span>
+            </div>
+            <div>
+              <div className="text-xs font-medium">Simplify Diagrams</div>
+              <div className="text-xs text-muted-foreground">v1.0.0</div>
+            </div>
+          </div>
+          <Link to="/">
+            <Button variant="ghost" size="sm">
+              <Home size={16} />
+            </Button>
+          </Link>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
+  
+  return (
+    <SidebarProvider>
+      <div className="h-screen flex w-full">
+        <AppSidebar />
         
-        {/* Input Area */}
-        <div className="border-t p-4 bg-background">
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-            <div className="relative">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter Mermaid.js diagram code..."
-                className="pr-20 py-6 min-h-24 resize-none"
-              />
-              <Button 
-                type="submit" 
-                className="absolute right-1 bottom-1 h-10"
-                disabled={isLoading || !input.trim()}
-              >
-                {isLoading ? "Generating..." : (
-                  <>
-                    <Send size={16} className="mr-2" />
-                    Generate
-                  </>
-                )}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          <header className="border-b p-4 flex items-center justify-between bg-background/80 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu size={20} />
+                </Button>
+              </SidebarTrigger>
+              <span className="font-medium text-lg">Diagram Generator</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleClearConversation}>
+                <Trash2 size={16} className="mr-1" />
+                Clear
+              </Button>
+              <Button variant="outline" size="sm">
+                <Save size={16} className="mr-1" />
+                Save
+              </Button>
+              <Button variant="outline" size="sm">
+                <Settings size={16} />
               </Button>
             </div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              <span>Tip: Start with graph TD, flowchart LR, or sequenceDiagram to create different diagram types.</span>
-            </div>
-          </form>
+          </header>
+          
+          {/* Messages Container */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {conversation.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                <MessageSquare size={48} className="text-muted-foreground/50 mb-4" />
+                <h3 className="text-2xl font-medium mb-2">Start Creating Diagrams</h3>
+                <p className="text-muted-foreground max-w-md">
+                  Enter Mermaid.js code in the input below to generate beautiful workflow diagrams.
+                </p>
+              </div>
+            ) : (
+              conversation.map((message, index) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className={`max-w-3xl rounded-lg p-4 ${
+                    message.type === "user" 
+                      ? "bg-primary/10 ml-12" 
+                      : "bg-card border mr-12"
+                  }`}>
+                    {message.type === "user" ? (
+                      <div>
+                        <div className="text-sm font-medium mb-2">You</div>
+                        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 bg-muted rounded">
+                          {message.content}
+                        </pre>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-sm font-medium mb-2">Assistant</div>
+                        <div className="mb-3">
+                          <MermaidDiagram 
+                            code={message.content} 
+                            zoomLevel={zoomLevel}
+                            panOffset={panOffset}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleZoomIn()}
+                            >
+                              <ZoomIn size={14} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleZoomOut()}
+                            >
+                              <ZoomOut size={14} />
+                            </Button>
+                            <span className="text-xs text-muted-foreground mx-1">
+                              {Math.round(zoomLevel * 100)}%
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleCopyDiagram(message.content)}
+                            >
+                              <Copy size={14} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={handleDownloadDiagram}
+                            >
+                              <Download size={14} />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            )}
+            <div ref={endOfMessagesRef} />
+          </div>
+          
+          {/* Input Area */}
+          <div className="border-t p-4 bg-background">
+            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+              <div className="relative">
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Enter Mermaid.js diagram code..."
+                  className="pr-20 py-6 min-h-24 resize-none"
+                />
+                <Button 
+                  type="submit" 
+                  className="absolute right-1 bottom-1 h-10"
+                  disabled={isLoading || !input.trim()}
+                >
+                  {isLoading ? "Generating..." : (
+                    <>
+                      <Send size={16} className="mr-2" />
+                      Generate
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                <span>Tip: Start with graph TD, flowchart LR, or sequenceDiagram to create different diagram types.</span>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
