@@ -3,9 +3,14 @@ import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Badge } from "@/components/ui/badge";
+import { Coins } from "lucide-react";
 
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
+  // Mock user credits - In a real app, this would come from your auth/user context
+  const userCredits = 10;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +51,13 @@ const NavBar = () => {
         </nav>
         
         <div className="flex items-center gap-4">
+          <Badge variant="outline" className="flex items-center gap-1 py-1 px-3 border-primary/30">
+            <Coins size={14} className="text-primary" />
+            <span className="text-sm font-medium">{userCredits} credits</span>
+          </Badge>
+          
+          <ThemeToggle />
+          
           <Link to="/auth">
             <Button variant="ghost" size="sm" className="hidden md:inline-flex">
               Login

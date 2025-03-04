@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,13 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background">
+      <Link to="/" className="absolute top-4 left-4 z-10">
+        <Button variant="ghost" size="sm" className="gap-2">
+          <ArrowLeft size={16} />
+          Back to Home
+        </Button>
+      </Link>
+      
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -60,13 +68,6 @@ const Auth = () => {
       >
         {/* Left Column - Branding/Info */}
         <AnimatedSection className="flex-1 flex flex-col justify-center relative">
-          <Link to="/" className="absolute top-0 left-0 p-4">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft size={16} />
-              Back to Home
-            </Button>
-          </Link>
-          
           <div className="flex items-center gap-3 mb-8">
             <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-semibold text-lg">S</span>
