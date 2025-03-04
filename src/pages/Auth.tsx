@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import AnimatedSection from "@/components/AnimatedSection";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, ArrowLeft, User, Mail, Lock, GitHub } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, User, Mail, Lock, Github } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Auth = () => {
