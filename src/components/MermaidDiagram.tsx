@@ -1,5 +1,6 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import mermaid from "mermaid";
 
 interface MermaidDiagramProps {
   code: string;
@@ -7,106 +8,65 @@ interface MermaidDiagramProps {
   panOffset?: { x: number; y: number };
 }
 
-export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ 
-  code, 
+export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
+  code,
   zoomLevel = 1,
-  panOffset = { x: 0, y: 0 }
+  panOffset = { x: 0, y: 0 },
 }) => {
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-  const [localPanOffset, setLocalPanOffset] = useState(panOffset);
-  
+
   useEffect(() => {
-    // Mock rendering for UI purposes - actual rendering will be handled by backend
-    try {
-      setError(null);
-      // For UI demo purposes, we'll use a placeholder SVG
-      const mockSvg = `<svg width="100%" height="100%" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-        <rect x="50" y="50" width="200" height="100" rx="10" fill="#f0f0f0" stroke="#666" />
-        <text x="150" y="100" text-anchor="middle" dominant-baseline="middle" font-family="Arial">Node A</text>
-        <rect x="550" y="50" width="200" height="100" rx="10" fill="#f0f0f0" stroke="#666" />
-        <text x="650" y="100" text-anchor="middle" dominant-baseline="middle" font-family="Arial">Node B</text>
-        <path d="M 250 100 H 400 L 550 100" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
-        <defs>
-          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-          </marker>
-        </defs>
-      </svg>`;
-      setSvg(mockSvg);
-    } catch (err) {
-      console.error("Diagram rendering error:", err);
-      setError("Failed to render diagram. Please check your syntax.");
-      setSvg("");
-    }
-  }, [code]);
-  
-  useEffect(() => {
-    setLocalPanOffset(panOffset);
-  }, [panOffset]);
-  
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartPoint({ x: e.clientX, y: e.clientY });
-  };
-  
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    
-    const dx = e.clientX - startPoint.x;
-    const dy = e.clientY - startPoint.y;
-    
-    setLocalPanOffset(prev => ({
-      x: prev.x + dx,
-      y: prev.y + dy
-    }));
-    
-    setStartPoint({ x: e.clientX, y: e.clientY });
-  };
-  
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-  
-  useEffect(() => {
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+      securityLevel: 'loose',
+      logLevel: 'error',
+    });
+
+    const renderDiagram = async () => {
+      try {
+        const { svg } = await mermaid.render(`mermaid-${Date.now()}`, code);
+        setSvg(svg);
+        setError(null);
+      } catch (err) {
+        console.error("Mermaid rendering error:", err);
+        setError("Failed to render diagram. Please check your syntax.");
+        setSvg("");
+      }
     };
-  }, []);
-  
+
+    renderDiagram();
+  }, [code, document.documentElement.classList.contains('dark')]);
+
+  if (error) {
+    return (
+      <div className="text-red-500 p-4 bg-red-50 dark:bg-red-900/20 rounded-md">
+        <p className="font-medium">Error rendering diagram:</p>
+        <pre className="mt-2 text-sm overflow-auto">{error}</pre>
+        <pre className="mt-2 text-sm overflow-auto bg-muted p-2 rounded">{code}</pre>
+      </div>
+    );
+  }
+
   return (
     <div 
-      ref={containerRef}
-      className="overflow-hidden border rounded-md bg-white w-full"
+      className="w-full h-full flex items-center justify-center overflow-auto bg-transparent"
       style={{ 
-        cursor: isDragging ? "grabbing" : "grab",
-        minHeight: "200px",
-        height: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center"
+        transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
       }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
     >
-      {error ? (
-        <div className="p-4 text-destructive text-sm">
-          {error}
-        </div>
-      ) : (
+      {svg ? (
         <div 
-          className="w-full h-full flex justify-center items-center"
-          style={{ 
-            transform: `scale(${zoomLevel}) translate(${localPanOffset.x}px, ${localPanOffset.y}px)`,
-            transformOrigin: "center",
-            transition: "transform 0.1s ease",
-          }}
+          className="w-full transition-all duration-300 ease-in-out"
           dangerouslySetInnerHTML={{ __html: svg }} 
         />
+      ) : (
+        <div className="animate-pulse flex items-center justify-center p-8">
+          <div className="rounded-md bg-muted w-full h-40 flex items-center justify-center">
+            <span className="text-muted-foreground">Generating diagram...</span>
+          </div>
+        </div>
       )}
     </div>
   );

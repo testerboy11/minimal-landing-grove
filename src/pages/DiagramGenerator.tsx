@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -20,6 +19,7 @@ import {
   SidebarProvider
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Mock conversation for initial state
 const initialConversation = [
@@ -116,11 +116,14 @@ const DiagramGenerator = () => {
   const AppSidebar = () => (
     <Sidebar className="border-r">
       <SidebarHeader className="px-4 py-3 border-b">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-semibold">S</span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-semibold">S</span>
+            </div>
+            <span className="font-medium text-lg">Simplify Diagrams</span>
           </div>
-          <span className="font-medium text-lg">Simplify Diagrams</span>
+          <ThemeToggle />
         </div>
       </SidebarHeader>
       
