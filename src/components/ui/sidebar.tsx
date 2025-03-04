@@ -119,17 +119,25 @@ export interface SidebarTriggerProps extends React.ButtonHTMLAttributes<HTMLButt
 export function SidebarTrigger({ className, asChild, ...props }: SidebarTriggerProps) {
   const { open, onOpenChange } = useSidebarContext()
   
-  const Comp = asChild ? Slot : Button
+  if (asChild) {
+    return (
+      <Slot
+        className={cn(className)}
+        onClick={() => onOpenChange(!open)}
+        {...props}
+      />
+    )
+  }
   
   return (
-    <Comp
+    <Button
       variant="ghost"
       size="icon"
       className={cn(className)}
       onClick={() => onOpenChange(!open)}
       {...props}
     >
-      {!asChild && <Menu size={20} />}
-    </Comp>
+      <Menu size={20} />
+    </Button>
   )
 }

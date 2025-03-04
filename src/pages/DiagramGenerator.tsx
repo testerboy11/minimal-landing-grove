@@ -236,9 +236,9 @@ const DiagramGenerator = () => {
         
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <header className="border-b p-4 flex items-center justify-between bg-background/80 backdrop-blur-sm">
+          <header className="border-b p-4 flex items-center justify-between bg-background/80 backdrop-blur-sm sticky top-0 z-10">
             <div className="flex items-center gap-2">
-              <SidebarTrigger asChild>
+              <SidebarTrigger>
                 <Button variant="ghost" size="icon">
                   <Menu size={20} />
                 </Button>
@@ -261,8 +261,8 @@ const DiagramGenerator = () => {
             </div>
           </header>
           
-          {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {/* Messages Container - Improved for scrolling */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 scroll-fade">
             {conversation.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8">
                 <MessageSquare size={48} className="text-muted-foreground/50 mb-4" />
@@ -272,7 +272,7 @@ const DiagramGenerator = () => {
                 </p>
               </div>
             ) : (
-              conversation.map((message, index) => (
+              conversation.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -280,34 +280,50 @@ const DiagramGenerator = () => {
                   transition={{ duration: 0.3 }}
                   className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`max-w-3xl rounded-lg p-4 ${
-                    message.type === "user" 
-                      ? "bg-primary/10 ml-12" 
-                      : "bg-card border mr-12"
-                  }`}>
+                  <div 
+                    className={`
+                      max-w-[85%] rounded-lg p-4
+                      ${message.type === "user" 
+                        ? "bg-primary/10 ml-12 rounded-tr-none" 
+                        : "bg-card border mr-12 rounded-tl-none"}
+                    `}
+                  >
                     {message.type === "user" ? (
                       <div>
-                        <div className="text-sm font-medium mb-2">You</div>
-                        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 bg-muted rounded">
+                        <div className="text-sm font-medium mb-2 flex items-center justify-between">
+                          <span>You</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 bg-muted rounded max-h-[300px] overflow-y-auto">
                           {message.content}
                         </pre>
                       </div>
                     ) : (
                       <div>
-                        <div className="text-sm font-medium mb-2">Assistant</div>
-                        <div className="mb-3">
-                          <MermaidDiagram 
-                            code={message.content} 
-                            zoomLevel={zoomLevel}
-                            panOffset={panOffset}
-                          />
+                        <div className="text-sm font-medium mb-2 flex items-center justify-between">
+                          <span>Assistant</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="mb-3 w-full h-full">
+                          <div className="diagram-container w-full overflow-hidden">
+                            <MermaidDiagram 
+                              code={message.content} 
+                              zoomLevel={zoomLevel}
+                              panOffset={panOffset}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 border-t pt-2">
                           <div className="flex items-center gap-1">
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleZoomIn()}
+                              className="h-8 w-8 p-0"
                             >
                               <ZoomIn size={14} />
                             </Button>
@@ -315,6 +331,7 @@ const DiagramGenerator = () => {
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleZoomOut()}
+                              className="h-8 w-8 p-0"
                             >
                               <ZoomOut size={14} />
                             </Button>
@@ -327,6 +344,7 @@ const DiagramGenerator = () => {
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleCopyDiagram(message.content)}
+                              className="h-8 w-8 p-0"
                             >
                               <Copy size={14} />
                             </Button>
@@ -334,6 +352,7 @@ const DiagramGenerator = () => {
                               variant="ghost" 
                               size="sm"
                               onClick={handleDownloadDiagram}
+                              className="h-8 w-8 p-0"
                             >
                               <Download size={14} />
                             </Button>
@@ -348,8 +367,8 @@ const DiagramGenerator = () => {
             <div ref={endOfMessagesRef} />
           </div>
           
-          {/* Input Area */}
-          <div className="border-t p-4 bg-background">
+          {/* Input Area - Fixed at bottom */}
+          <div className="border-t p-4 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
             <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
               <div className="relative">
                 <Textarea

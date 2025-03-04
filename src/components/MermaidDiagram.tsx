@@ -81,11 +81,14 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   return (
     <div 
       ref={containerRef}
-      className="overflow-hidden border rounded-md bg-white"
+      className="overflow-hidden border rounded-md bg-white w-full"
       style={{ 
         cursor: isDragging ? "grabbing" : "grab",
         minHeight: "200px",
-        maxHeight: "500px",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -96,6 +99,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
         </div>
       ) : (
         <div 
+          className="w-full h-full flex justify-center items-center"
           style={{ 
             transform: `scale(${zoomLevel}) translate(${localPanOffset.x}px, ${localPanOffset.y}px)`,
             transformOrigin: "center",
