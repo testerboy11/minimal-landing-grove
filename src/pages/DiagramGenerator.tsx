@@ -1,6 +1,7 @@
+
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { ZoomIn, ZoomOut, Download, Copy, Send, Trash2, Settings, Home, Menu, MessageSquare, Save, History, ChevronLeft, ChevronRight, Info, UserCircle } from "lucide-react";
+import { ZoomIn, ZoomOut, Download, Copy, Send, Trash2, Settings, Home, Menu, MessageSquare, Save, History, ChevronLeft, ChevronRight, Info, UserCircle, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +9,7 @@ import { MermaidDiagram } from "@/components/MermaidDiagram";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarTrigger, SidebarProvider } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +41,9 @@ const DiagramGenerator = () => {
     x: 0,
     y: 0
   });
+  // Mock user credits - In a real app, this would come from your auth/user context
+  const userCredits = 10;
+  
   const {
     toast
   } = useToast();
@@ -112,7 +117,8 @@ const DiagramGenerator = () => {
     });
   };
 
-  const AppSidebar = () => <Sidebar className="border-r h-screen">
+  const AppSidebar = () => (
+    <Sidebar className="border-r h-[100vh]">
       <SidebarHeader className="px-4 py-3 border-b">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
@@ -127,27 +133,52 @@ const DiagramGenerator = () => {
       
       <SidebarContent className="px-4 py-4">
         <div className="space-y-6">
+          {/* Credits Display */}
+          <div className="bg-muted/50 rounded-lg p-4 border border-border">
+            <h3 className="text-sm font-medium flex items-center gap-2 mb-2">
+              <Coins size={16} className="text-primary" />
+              Your Credits
+            </h3>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold">{userCredits}</div>
+              <Link to="/checkout">
+                <Button variant="outline" size="sm" className="text-xs h-7">Get More</Button>
+              </Link>
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Each diagram generation uses 1 credit
+            </div>
+          </div>
+
           <div>
             <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
               <History size={16} />
               Recent Conversations
             </h3>
             
-            {conversation.length > 0 ? <div className="space-y-2">
-                {conversation.filter(msg => msg.type === "assistant").slice(-5).map(msg => <div key={msg.id} className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer flex items-center gap-2">
-                      <MessageSquare size={12} />
-                      <div className="truncate flex-1">
-                        {msg.content.substring(0, 30)}...
-                      </div>
-                      <ChevronRight size={12} />
-                    </div>)}
-              </div> : <div className="text-xs text-muted-foreground">
+            {conversation.length > 0 ? (
+              <div className="space-y-2">
+                {conversation.filter(msg => msg.type === "assistant").slice(-5).map(msg => (
+                  <div key={msg.id} className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer flex items-center gap-2">
+                    <MessageSquare size={12} />
+                    <div className="truncate flex-1">
+                      {msg.content.substring(0, 30)}...
+                    </div>
+                    <ChevronRight size={12} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">
                 No conversation history yet.
-              </div>}
+              </div>
+            )}
             
-            {conversation.length > 0 && <Button variant="ghost" size="sm" className="w-full mt-2 text-xs h-8" onClick={handleClearConversation}>
+            {conversation.length > 0 && (
+              <Button variant="ghost" size="sm" className="w-full mt-2 text-xs h-8" onClick={handleClearConversation}>
                 Clear History
-              </Button>}
+              </Button>
+            )}
           </div>
           
           <div>
@@ -208,9 +239,11 @@ const DiagramGenerator = () => {
           </Link>
         </div>
       </SidebarFooter>
-    </Sidebar>;
+    </Sidebar>
+  );
 
-  return <SidebarProvider>
+  return (
+    <SidebarProvider>
       <div className="h-screen flex w-full">
         <AppSidebar />
         
@@ -226,7 +259,16 @@ const DiagramGenerator = () => {
               <span className="font-medium text-lg">Diagram Generator</span>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Credits badge in header */}
+              <Badge 
+                variant="outline" 
+                className="flex items-center gap-1 py-1.5 px-3 border-primary/30 bg-primary/5"
+              >
+                <Coins size={14} className="text-primary" />
+                <span className="text-sm font-medium">{userCredits} credits</span>
+              </Badge>
+              
               <Button variant="outline" size="sm" onClick={handleClearConversation}>
                 <Trash2 size={16} className="mr-1" />
                 Clear
@@ -268,7 +310,7 @@ const DiagramGenerator = () => {
                       <h4 className="text-sm font-medium">Credits Available</h4>
                       <div className="flex items-center gap-2">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-bold">12</span>
+                          <span className="text-primary font-bold">{userCredits}</span>
                         </div>
                         <div>
                           <p className="text-sm">Diagram Credits</p>
@@ -279,7 +321,9 @@ const DiagramGenerator = () => {
                     
                     <div className="flex gap-2">
                       <Button variant="outline" className="w-full">Profile Settings</Button>
-                      <Button variant="outline" className="w-full">Billing</Button>
+                      <Link to="/checkout" className="w-full">
+                        <Button variant="default" className="w-full">Get More Credits</Button>
+                      </Link>
                     </div>
                   </div>
                 </DialogContent>
@@ -292,45 +336,50 @@ const DiagramGenerator = () => {
           
           {/* Messages Container - Improved for scrolling */}
           <div className="flex-1 overflow-y-auto p-4 space-y-6 scroll-fade px-[16px]">
-            {conversation.length === 0 ? <div className="h-full flex flex-col items-center justify-center text-center p-8">
+            {conversation.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-8">
                 <MessageSquare size={48} className="text-muted-foreground/50 mb-4" />
                 <h3 className="text-2xl font-medium mb-2">Start Creating Diagrams</h3>
                 <p className="text-muted-foreground max-w-md">
                   Enter Mermaid.js code in the input below to generate beautiful workflow diagrams.
                 </p>
-              </div> : conversation.map(message => <motion.div key={message.id} initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.3
-          }} className={`flex ${message.type === "user" ? "justify-end" : "justify-start w-full"}`}>
+              </div>
+            ) : (
+              conversation.map(message => (
+                <motion.div 
+                  key={message.id} 
+                  initial={{ opacity: 0, y: 20 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  transition={{ duration: 0.3 }} 
+                  className={`flex ${message.type === "user" ? "justify-end" : "justify-start w-full"}`}
+                >
                   <div className={`
-                      ${message.type === "user" ? "max-w-[85%] bg-primary/10 ml-12 rounded-tr-none rounded-lg p-4" : "w-full bg-card border rounded-lg p-4"}
-                    `}>
-                    {message.type === "user" ? <div>
+                    ${message.type === "user" ? "max-w-[85%] bg-primary/10 ml-12 rounded-tr-none rounded-lg p-4" : "w-full bg-card border rounded-lg p-4"}
+                  `}>
+                    {message.type === "user" ? (
+                      <div>
                         <div className="text-sm font-medium mb-2 flex items-center justify-between">
                           <span>You</span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </span>
                         </div>
                         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 bg-muted rounded max-h-[300px] overflow-y-auto">
                           {message.content}
                         </pre>
-                      </div> : <div>
+                      </div>
+                    ) : (
+                      <div>
                         <div className="text-sm font-medium mb-2 flex items-center justify-between">
                           <span>Assistant</span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </span>
                         </div>
                         <div className="mb-3 w-full h-full">
@@ -359,32 +408,39 @@ const DiagramGenerator = () => {
                             </Button>
                           </div>
                         </div>
-                      </div>}
+                      </div>
+                    )}
                   </div>
-                </motion.div>)}
+                </motion.div>
+              ))
+            )}
             <div ref={endOfMessagesRef} />
           </div>
           
           {/* Input Area - Fixed at bottom */}
           <div className="border-t p-4 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
             <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
-              <div className="flex flex-col gap-3">
+              <div className="space-y-3">
                 <Textarea 
                   value={input} 
                   onChange={e => setInput(e.target.value)} 
                   placeholder="Enter Mermaid.js diagram code..." 
                   className="py-6 min-h-28 resize-none w-full" 
                 />
-                <Button 
-                  type="submit" 
-                  className="w-full md:w-auto ml-auto"
-                  disabled={isLoading || !input.trim()}
-                >
-                  {isLoading ? "Generating..." : <>
-                      <Send size={16} className="mr-2" />
-                      Generate
-                    </>}
-                </Button>
+                <div className="flex justify-end">
+                  <Button 
+                    type="submit" 
+                    className="w-full md:w-auto"
+                    disabled={isLoading || !input.trim()}
+                  >
+                    {isLoading ? "Generating..." : (
+                      <>
+                        <Send size={16} className="mr-2" />
+                        Generate
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
               <div className="mt-2 text-xs text-muted-foreground">
                 <span>Tip: Start with graph TD, flowchart LR, or sequenceDiagram to create different diagram types.</span>
@@ -393,7 +449,8 @@ const DiagramGenerator = () => {
           </div>
         </div>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 };
 
 export default DiagramGenerator;

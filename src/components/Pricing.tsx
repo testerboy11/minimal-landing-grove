@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface PlanFeature {
   text: string;
@@ -10,6 +11,7 @@ interface PlanFeature {
 }
 
 interface PricingPlan {
+  id: string;
   name: string;
   description: string;
   price: {
@@ -23,6 +25,7 @@ interface PricingPlan {
 
 const plans: PricingPlan[] = [
   {
+    id: "basic",
     name: "Basic",
     description: "Essential features for individuals getting started",
     price: {
@@ -40,6 +43,7 @@ const plans: PricingPlan[] = [
     buttonText: "Start Basic",
   },
   {
+    id: "professional",
     name: "Professional",
     description: "Perfect for growing teams and businesses",
     price: {
@@ -58,6 +62,7 @@ const plans: PricingPlan[] = [
     buttonText: "Start Professional",
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     description: "Advanced features for larger organizations",
     price: {
@@ -165,15 +170,17 @@ const Pricing = () => {
                   ))}
                 </ul>
                 
-                <Button 
-                  className={cn(
-                    "mt-8 w-full",
-                    plan.popular ? "" : "bg-secondary/80 text-foreground hover:bg-secondary"
-                  )}
-                  variant={plan.popular ? "default" : "outline"}
-                >
-                  {plan.buttonText}
-                </Button>
+                <Link to={`/checkout/${plan.id}`}>
+                  <Button 
+                    className={cn(
+                      "mt-8 w-full",
+                      plan.popular ? "" : "bg-secondary/80 text-foreground hover:bg-secondary"
+                    )}
+                    variant={plan.popular ? "default" : "outline"}
+                  >
+                    {plan.buttonText}
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}
