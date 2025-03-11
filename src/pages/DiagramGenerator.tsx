@@ -21,6 +21,7 @@ const initialConversation = [{
   content: "graph TD;\n    A[Client] --> B[Load Balancer];\n    B --> C[Server1];\n    B --> D[Server2];",
   timestamp: new Date().toISOString()
 }];
+
 const DiagramGenerator = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +35,7 @@ const DiagramGenerator = () => {
     toast
   } = useToast();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -69,6 +71,7 @@ const DiagramGenerator = () => {
       }, 100);
     }, 1500);
   };
+
   const handleCopyDiagram = (diagramCode: string) => {
     navigator.clipboard.writeText(diagramCode);
     toast({
@@ -76,6 +79,7 @@ const DiagramGenerator = () => {
       description: "Diagram code has been copied to your clipboard."
     });
   };
+
   const handleDownloadDiagram = () => {
     // In a real implementation, you would generate SVG or PNG download
     toast({
@@ -83,12 +87,15 @@ const DiagramGenerator = () => {
       description: "Your diagram is being downloaded."
     });
   };
+
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.1, 2));
   };
+
   const handleZoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
   };
+
   const handleClearConversation = () => {
     setConversation([]);
     toast({
@@ -96,6 +103,7 @@ const DiagramGenerator = () => {
       description: "All messages have been removed."
     });
   };
+
   const AppSidebar = () => <Sidebar className="border-r">
       <SidebarHeader className="px-4 py-3 border-b">
         <div className="flex items-center justify-between w-full">
@@ -193,6 +201,7 @@ const DiagramGenerator = () => {
         </div>
       </SidebarFooter>
     </Sidebar>;
+
   return <SidebarProvider>
       <div className="h-screen flex w-full">
         <AppSidebar />
@@ -240,10 +249,9 @@ const DiagramGenerator = () => {
             y: 0
           }} transition={{
             duration: 0.3
-          }} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+          }} className={`flex ${message.type === "user" ? "justify-end" : "justify-start w-full"}`}>
                   <div className={`
-                      max-w-[85%] rounded-lg p-4
-                      ${message.type === "user" ? "bg-primary/10 ml-12 rounded-tr-none" : "bg-card border mr-12 rounded-tl-none"}
+                      ${message.type === "user" ? "max-w-[85%] bg-primary/10 ml-12 rounded-tr-none rounded-lg p-4" : "w-full bg-card border rounded-lg p-4"}
                     `}>
                     {message.type === "user" ? <div>
                         <div className="text-sm font-medium mb-2 flex items-center justify-between">
@@ -302,10 +310,19 @@ const DiagramGenerator = () => {
           
           {/* Input Area - Fixed at bottom */}
           <div className="border-t p-4 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
-            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+            <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
               <div className="relative">
-                <Textarea value={input} onChange={e => setInput(e.target.value)} placeholder="Enter Mermaid.js diagram code..." className="pr-20 py-6 min-h-24 resize-none" />
-                <Button type="submit" className="absolute right-1 bottom-1 h-10" disabled={isLoading || !input.trim()}>
+                <Textarea 
+                  value={input} 
+                  onChange={e => setInput(e.target.value)} 
+                  placeholder="Enter Mermaid.js diagram code..." 
+                  className="pr-24 py-6 min-h-28 resize-none w-full" 
+                />
+                <Button 
+                  type="submit" 
+                  className="absolute right-2 bottom-2 h-10" 
+                  disabled={isLoading || !input.trim()}
+                >
                   {isLoading ? "Generating..." : <>
                       <Send size={16} className="mr-2" />
                       Generate
@@ -321,4 +338,5 @@ const DiagramGenerator = () => {
       </div>
     </SidebarProvider>;
 };
+
 export default DiagramGenerator;
