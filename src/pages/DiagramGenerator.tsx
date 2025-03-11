@@ -1,12 +1,37 @@
 
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { ZoomIn, ZoomOut, Download, Copy, Send, Trash2, Settings, Home, Menu, MessageSquare, Save, History, ChevronLeft, ChevronRight, Info, UserCircle, Coins } from "lucide-react";
+import { 
+  ZoomIn, 
+  ZoomOut, 
+  Download, 
+  Copy, 
+  Send, 
+  Trash2, 
+  Settings, 
+  Home, 
+  Menu, 
+  MessageSquare, 
+  Save, 
+  History, 
+  ChevronRight, 
+  Info, 
+  UserCircle, 
+  Coins, 
+  User
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { MermaidDiagram } from "@/components/MermaidDiagram";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarTrigger, SidebarProvider } from "@/components/ui/sidebar";
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader, 
+  SidebarFooter, 
+  SidebarTrigger, 
+  SidebarProvider 
+} from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +43,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter
+} from "@/components/ui/card";
 
 // Mock conversation for initial state
 const initialConversation = [{
@@ -41,12 +75,17 @@ const DiagramGenerator = () => {
     x: 0,
     y: 0
   });
-  // Mock user credits - In a real app, this would come from your auth/user context
-  const userCredits = 10;
   
-  const {
-    toast
-  } = useToast();
+  // Mock user data - In a real app, this would come from your auth/user context
+  const userData = {
+    name: "John Doe",
+    email: "john.doe@example.com",
+    credits: 10,
+    avatar: null,
+    plan: "Pro Plan"
+  };
+  
+  const { toast } = useToast();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -118,7 +157,7 @@ const DiagramGenerator = () => {
   };
 
   const AppSidebar = () => (
-    <Sidebar className="border-r h-[100vh]">
+    <Sidebar className="border-r h-screen">
       <SidebarHeader className="px-4 py-3 border-b">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
@@ -131,7 +170,7 @@ const DiagramGenerator = () => {
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="px-4 py-4">
+      <SidebarContent className="px-4 py-4 overflow-y-auto">
         <div className="space-y-6">
           {/* Credits Display */}
           <div className="bg-muted/50 rounded-lg p-4 border border-border">
@@ -140,7 +179,7 @@ const DiagramGenerator = () => {
               Your Credits
             </h3>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{userCredits}</div>
+              <div className="text-2xl font-bold">{userData.credits}</div>
               <Link to="/checkout">
                 <Button variant="outline" size="sm" className="text-xs h-7">Get More</Button>
               </Link>
@@ -156,9 +195,9 @@ const DiagramGenerator = () => {
               Recent Conversations
             </h3>
             
-            {conversation.length > 0 ? (
-              <div className="space-y-2">
-                {conversation.filter(msg => msg.type === "assistant").slice(-5).map(msg => (
+            <div className="max-h-48 overflow-y-auto pr-1 space-y-2">
+              {conversation.length > 0 ? (
+                conversation.filter(msg => msg.type === "assistant").slice(-5).map(msg => (
                   <div key={msg.id} className="text-xs p-2 border rounded-md hover:bg-accent transition-colors cursor-pointer flex items-center gap-2">
                     <MessageSquare size={12} />
                     <div className="truncate flex-1">
@@ -166,13 +205,13 @@ const DiagramGenerator = () => {
                     </div>
                     <ChevronRight size={12} />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground">
-                No conversation history yet.
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="text-xs text-muted-foreground">
+                  No conversation history yet.
+                </div>
+              )}
+            </div>
             
             {conversation.length > 0 && (
               <Button variant="ghost" size="sm" className="w-full mt-2 text-xs h-8" onClick={handleClearConversation}>
@@ -266,21 +305,23 @@ const DiagramGenerator = () => {
                 className="flex items-center gap-1 py-1.5 px-3 border-primary/30 bg-primary/5"
               >
                 <Coins size={14} className="text-primary" />
-                <span className="text-sm font-medium">{userCredits} credits</span>
+                <span className="text-sm font-medium">{userData.credits} credits</span>
               </Badge>
               
               <Button variant="outline" size="sm" onClick={handleClearConversation}>
                 <Trash2 size={16} className="mr-1" />
                 Clear
               </Button>
+              
               <Button variant="outline" size="sm">
                 <Save size={16} className="mr-1" />
                 Save
               </Button>
+              
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <UserCircle size={16} />
+                    <User size={16} />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -291,43 +332,57 @@ const DiagramGenerator = () => {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
-                    <div className="flex items-center justify-between border-b pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                          <UserCircle className="h-8 w-8 text-primary" />
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>{userData.name}</CardTitle>
+                            <CardDescription>{userData.email}</CardDescription>
+                          </div>
+                          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                            {userData.avatar ? (
+                              <img 
+                                src={userData.avatar} 
+                                alt={userData.name} 
+                                className="h-full w-full rounded-full object-cover" 
+                              />
+                            ) : (
+                              <User className="h-8 w-8 text-primary" />
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium">John Doe</h4>
-                          <p className="text-sm text-muted-foreground">john.doe@example.com</p>
+                      </CardHeader>
+                      <CardContent className="pb-3">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <Coins size={16} className="text-primary" />
+                            <span className="text-sm font-medium">{userData.credits} credits available</span>
+                          </div>
+                          <Badge variant="outline">{userData.plan}</Badge>
                         </div>
-                      </div>
-                      <div className="bg-muted px-3 py-1 rounded-full text-xs font-medium">
-                        Pro Plan
-                      </div>
-                    </div>
+                      </CardContent>
+                      <CardFooter className="justify-between pt-2 border-t">
+                        <Link to="/checkout" className="w-full">
+                          <Button variant="outline" size="sm" className="w-full">
+                            Upgrade Plan
+                          </Button>
+                        </Link>
+                      </CardFooter>
+                    </Card>
                     
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Credits Available</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-bold">{userCredits}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm">Diagram Credits</p>
-                          <p className="text-xs text-muted-foreground">Renews on July 1, 2023</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button variant="outline" className="w-full">Profile Settings</Button>
-                      <Link to="/checkout" className="w-full">
-                        <Button variant="default" className="w-full">Get More Credits</Button>
-                      </Link>
+                      <Button variant="outline" size="sm" className="w-full justify-start">
+                        <Settings size={14} className="mr-2" />
+                        Account Settings
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full justify-start text-destructive hover:text-destructive">
+                        Sign Out
+                      </Button>
                     </div>
                   </div>
                 </DialogContent>
               </Dialog>
+              
               <Button variant="outline" size="sm">
                 <Settings size={16} />
               </Button>
@@ -417,20 +472,20 @@ const DiagramGenerator = () => {
             <div ref={endOfMessagesRef} />
           </div>
           
-          {/* Input Area - Fixed at bottom */}
+          {/* Input Area - Fixed at bottom with button on same level */}
           <div className="border-t p-4 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
             <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
               <div className="space-y-3">
-                <Textarea 
-                  value={input} 
-                  onChange={e => setInput(e.target.value)} 
-                  placeholder="Enter Mermaid.js diagram code..." 
-                  className="py-6 min-h-28 resize-none w-full" 
-                />
-                <div className="flex justify-end">
+                <div className="flex flex-col md:flex-row gap-3">
+                  <Textarea 
+                    value={input} 
+                    onChange={e => setInput(e.target.value)} 
+                    placeholder="Enter Mermaid.js diagram code..." 
+                    className="py-3 min-h-24 resize-none flex-1" 
+                  />
                   <Button 
                     type="submit" 
-                    className="w-full md:w-auto"
+                    className="h-auto md:h-auto md:self-stretch"
                     disabled={isLoading || !input.trim()}
                   >
                     {isLoading ? "Generating..." : (

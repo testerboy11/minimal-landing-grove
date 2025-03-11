@@ -5,13 +5,48 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
-import { Coins, ChevronRight } from "lucide-react";
+import { 
+  Coins, 
+  ChevronRight, 
+  User,
+  Settings,
+  LogOut,
+  CreditCard
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  // Mock user credits - In a real app, this would come from your auth/user context
-  const userCredits = 10;
+  // Mock user data - In a real app, this would come from your auth/user context
+  const userData = {
+    name: "John Doe",
+    email: "john.doe@example.com",
+    credits: 10,
+    avatar: null,
+    plan: "Pro Plan"
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,7 +99,9 @@ const NavBar = () => {
               to={link.path} 
               className={cn(
                 "nav-link relative px-2 py-1 transition-all",
-                isActiveLink(link.path) ? "text-primary font-semibold" : ""
+                isActiveLink(link.path) 
+                  ? "text-primary font-semibold" 
+                  : "hover:text-primary"
               )}
             >
               {link.label}
@@ -76,13 +113,22 @@ const NavBar = () => {
         </nav>
         
         <div className="flex items-center gap-4">
-          <Badge 
-            variant="outline" 
-            className="flex items-center gap-1 py-1.5 px-3 border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors"
-          >
-            <Coins size={14} className="text-primary" />
-            <span className="text-sm font-medium">{userCredits} credits</span>
-          </Badge>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge 
+                  variant="outline" 
+                  className="flex items-center gap-1 py-1.5 px-3 border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
+                >
+                  <Coins size={14} className="text-primary" />
+                  <span className="text-sm font-medium">{userData.credits} credits</span>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Available diagram credits</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           
           <ThemeToggle />
           
@@ -91,12 +137,78 @@ const NavBar = () => {
               Login
             </Button>
           </Link>
-          <Link to="/auth">
-            <Button className="animate-scale-in group">
-              Get Started
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="animate-scale-in group relative">
+                <span className="flex items-center gap-2">
+                  <User size={16} />
+                  <span className="hidden sm:inline">Account</span>
+                </span>
+                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Account</DialogTitle>
+                <DialogDescription>
+                  Manage your account settings and subscription.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="mt-4 space-y-6">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>{userData.name}</CardTitle>
+                        <CardDescription>{userData.email}</CardDescription>
+                      </div>
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        {userData.avatar ? (
+                          <img 
+                            src={userData.avatar} 
+                            alt={userData.name} 
+                            className="h-full w-full rounded-full object-cover" 
+                          />
+                        ) : (
+                          <User size={20} className="text-primary" />
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Coins size={16} className="text-primary" />
+                        <span className="text-sm font-medium">{userData.credits} credits available</span>
+                      </div>
+                      <Badge variant="outline">{userData.plan}</Badge>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between pt-2 border-t">
+                    <Link to="/checkout" className="w-full">
+                      <Button variant="outline" size="sm" className="w-full">
+                        <CreditCard size={14} className="mr-2" />
+                        Upgrade Plan
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+                
+                <div className="space-y-2">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Settings size={14} className="mr-2" />
+                    Account Settings
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <LogOut size={14} className="mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </header>

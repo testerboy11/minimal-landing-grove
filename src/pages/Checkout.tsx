@@ -1,255 +1,257 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, CreditCard, Check, Info, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import NavBar from "@/components/NavBar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link, useParams } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock plans data - in a real app, this would come from your backend
 const plans = [
   {
-    id: "basic",
-    name: "Basic",
-    price: {
-      monthly: 9,
-      yearly: 90,
-    },
-    credits: 100,
+    id: "free",
+    name: "Free",
+    price: "$0",
+    description: "For personal projects and learning",
     features: [
-      "Up to 3 projects",
-      "Basic analytics",
-      "24-hour support response time", 
-      "Community access"
-    ]
+      "3 diagrams per month",
+      "Basic diagram types",
+      "Download as PNG"
+    ],
+    highlight: false,
+    creditsPerMonth: 3
   },
   {
     id: "professional",
     name: "Professional",
-    price: {
-      monthly: 29,
-      yearly: 290,
-    },
-    credits: 500,
+    price: "$12",
+    period: "per month",
+    description: "For professionals and small teams",
     features: [
-      "Unlimited projects",
-      "Advanced analytics",
-      "4-hour support response time",
-      "Community access",
-      "Advanced integrations"
-    ]
+      "50 diagrams per month",
+      "All diagram types",
+      "Download in all formats",
+      "Priority support"
+    ],
+    highlight: true,
+    creditsPerMonth: 50
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    price: {
-      monthly: 79,
-      yearly: 790,
-    },
-    credits: 2000,
+    price: "$49",
+    period: "per month",
+    description: "For organizations with advanced needs",
     features: [
-      "Unlimited projects",
-      "Advanced analytics",
-      "1-hour support response time",
-      "Community access",
-      "Advanced integrations",
-      "Custom branding"
-    ]
+      "Unlimited diagrams",
+      "Team collaboration",
+      "API access",
+      "Custom integrations",
+      "Dedicated support"
+    ],
+    highlight: false,
+    creditsPerMonth: 999
   }
 ];
 
 const Checkout = () => {
-  const { planId } = useParams<{ planId: string }>();
-  const [annually, setAnnually] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(
-    planId && plans.find(p => p.id === planId) ? planId : "professional"
+  const { toast } = useToast();
+  const { planId } = useParams();
+  const [selectedPlan, setSelectedPlan] = useState(() => 
+    plans.find(plan => plan.id === planId) || plans[1]
   );
-  
-  const currentPlan = plans.find(p => p.id === selectedPlan) || plans[1];
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would process the payment here
-    toast.success("Payment successful! Your account has been upgraded.", {
-      description: `Welcome to the ${currentPlan.name} plan!`,
+    // In a real app, you would process payment here
+    toast({
+      title: "Payment Successful!",
+      description: `You've successfully subscribed to the ${selectedPlan.name} plan.`
     });
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-muted/30 pt-20 pb-12"
-    >
-      <div className="container max-w-6xl mx-auto px-4">
-        <div className="mb-8">
-          <Link to="/#pricing" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to pricing
-          </Link>
-          <h1 className="text-3xl font-bold mt-4 mb-2">Checkout</h1>
-          <p className="text-muted-foreground">Select your plan and payment method</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Plan Selection */}
-          <div className="lg:col-span-2 space-y-8">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Select your plan</h2>
-              
-              <div className="flex items-center justify-center mb-6 bg-muted rounded-lg p-1">
-                <button
-                  onClick={() => setAnnually(false)}
-                  className={`flex-1 py-2 text-center text-sm font-medium rounded-md transition-all ${
-                    !annually ? 'bg-card shadow-sm' : ''
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setAnnually(true)}
-                  className={`flex-1 py-2 text-center text-sm font-medium rounded-md transition-all ${
-                    annually ? 'bg-card shadow-sm' : ''
-                  }`}
-                >
-                  Annually
-                  <Badge className="ml-1 bg-primary/10 text-primary border-none">Save 20%</Badge>
-                </button>
-              </div>
-              
-              <RadioGroup 
-                value={selectedPlan} 
-                onValueChange={setSelectedPlan}
-                className="space-y-4"
-              >
-                {plans.map((plan) => (
-                  <Label
-                    key={plan.id}
-                    htmlFor={plan.id}
-                    className={`flex p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedPlan === plan.id 
-                        ? 'border-primary bg-primary/5' 
-                        : 'hover:bg-accent'
-                    }`}
-                  >
-                    <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
-                    <div className="ml-3 flex-1">
-                      <div className="flex justify-between">
-                        <div>
-                          <p className="font-medium">{plan.name}</p>
-                          <p className="text-muted-foreground text-sm">{plan.credits} diagram credits</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">${annually ? plan.price.yearly : plan.price.monthly}</p>
-                          <p className="text-xs text-muted-foreground">{annually ? 'per year' : 'per month'}</p>
-                        </div>
-                      </div>
-                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
-                        {plan.features.map((feature, i) => (
-                          <div key={i} className="flex items-center text-sm">
-                            <Check className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                            <span>{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Label>
-                ))}
-              </RadioGroup>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Payment information</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <Label htmlFor="card-number">Card number</Label>
-                      <div className="relative mt-1">
-                        <Input id="card-number" placeholder="1234 5678 9012 3456" className="pl-10" />
-                        <CreditCard className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="expiration">Expiration date</Label>
-                      <Input id="expiration" placeholder="MM/YY" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label htmlFor="cvc">CVC</Label>
-                      <Input id="cvc" placeholder="123" className="mt-1" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="name">Name on card</Label>
-                      <Input id="name" placeholder="John Doe" className="mt-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-muted/50 rounded-lg p-3 flex items-start">
-                    <Info className="h-5 w-5 text-muted-foreground mt-0.5 mr-2 flex-shrink-0" />
-                    <p className="text-sm text-muted-foreground">
-                      This is a demo checkout page. No actual payment will be processed.
-                    </p>
-                  </div>
-                  
-                  <Button type="submit" className="w-full">
-                    Pay ${annually ? currentPlan.price.yearly : currentPlan.price.monthly}
-                    {annually ? '/year' : '/month'}
-                  </Button>
-                </div>
-              </form>
-            </Card>
+    <div className="min-h-screen flex flex-col bg-background">
+      <NavBar />
+      
+      <main className="flex-1 pt-24 pb-16">
+        <div className="container max-w-6xl">
+          <div className="mb-8">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft size={16} />
+              Back to Home
+            </Link>
           </div>
           
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24">
-              <h2 className="text-xl font-semibold mb-4">Order summary</h2>
-              
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{currentPlan.name} Plan</span>
-                  <span>${annually ? currentPlan.price.yearly : currentPlan.price.monthly}</span>
+          <div className="grid md:grid-cols-2 gap-10">
+            <div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold mb-4">Selected Plan</h2>
+                  <Card className={`border-2 ${selectedPlan.highlight ? 'border-primary' : 'border-border'}`}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-xl">{selectedPlan.name}</CardTitle>
+                          <CardDescription>{selectedPlan.description}</CardDescription>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold">{selectedPlan.price}</div>
+                          {selectedPlan.period && (
+                            <div className="text-sm text-muted-foreground">{selectedPlan.period}</div>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Badge variant="outline" className="mb-4 bg-primary/5 text-primary">
+                        {selectedPlan.creditsPerMonth} credits per month
+                      </Badge>
+                      <ul className="space-y-2">
+                        {selectedPlan.features.map((feature, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Check size={18} className="text-primary shrink-0 mt-0.5" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter className="justify-between pt-4 border-t">
+                      <div className="flex gap-1 items-center text-sm text-muted-foreground">
+                        <Shield size={14} />
+                        <span>Secure checkout</span>
+                      </div>
+                    </CardFooter>
+                  </Card>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Diagram credits</span>
-                  <span>{currentPlan.credits}</span>
-                </div>
-                {annually && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Annual discount</span>
-                    <span>-$${(currentPlan.price.monthly * 12 - currentPlan.price.yearly).toFixed(2)}</span>
+                
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold mb-4">Need a different plan?</h2>
+                  <div className="flex gap-2 flex-wrap">
+                    {plans.map(plan => (
+                      <Button 
+                        key={plan.id}
+                        variant={plan.id === selectedPlan.id ? "default" : "outline"}
+                        onClick={() => setSelectedPlan(plan)}
+                        className={`h-auto py-2 px-4 ${plan.id === selectedPlan.id ? '' : 'hover:bg-primary/5'}`}
+                      >
+                        {plan.name}
+                      </Button>
+                    ))}
                   </div>
-                )}
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="flex justify-between font-bold mb-6">
-                <span>Total</span>
-                <span>${annually ? currentPlan.price.yearly : currentPlan.price.monthly}</span>
-              </div>
-              
-              <div className="bg-muted rounded-lg p-4">
-                <div className="flex">
-                  <Shield className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-medium text-sm">Secure checkout</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Your payment information is encrypted and secure. We never store your full card details.
+                </div>
+              </motion.div>
+            </div>
+            
+            <div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Payment Details</CardTitle>
+                    <CardDescription>Enter your payment information below</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input id="firstName" placeholder="John" required />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input id="lastName" placeholder="Doe" required />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input id="email" type="email" placeholder="john.doe@example.com" required />
+                        </div>
+                        
+                        <Separator className="my-4" />
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="cardNumber">Card Number</Label>
+                            <div className="flex items-center gap-2">
+                              <svg className="h-6 w-auto" viewBox="0 0 36 24" aria-hidden="true">
+                                <rect width="36" height="24" rx="4" fill="#1434CB" />
+                                <path d="M14.5 9.5H21.5V14.5H14.5V9.5Z" fill="#FFF100" />
+                              </svg>
+                              <svg className="h-6 w-auto" viewBox="0 0 36 24" aria-hidden="true">
+                                <rect width="36" height="24" rx="4" fill="#F26122" />
+                                <circle cx="14" cy="12" r="7" fill="#76777A" />
+                                <circle cx="22" cy="12" r="7" fill="#FFFFFF" />
+                              </svg>
+                            </div>
+                          </div>
+                          <Input
+                            id="cardNumber"
+                            placeholder="1234 5678 9012 3456"
+                            maxLength={19}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="expiryDate">Expiry Date</Label>
+                            <Input id="expiryDate" placeholder="MM/YY" maxLength={5} required />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="cvc">CVC</Label>
+                              <Info size={16} className="text-muted-foreground" />
+                            </div>
+                            <Input id="cvc" placeholder="123" maxLength={3} required />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Button type="submit" className="w-full">
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Pay {selectedPlan.price}
+                        </Button>
+                        <p className="text-xs text-center text-muted-foreground mt-2">
+                          You'll be charged {selectedPlan.price} {selectedPlan.period}
+                        </p>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+                
+                <div className="mt-6 space-y-4">
+                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <Shield size={16} className="shrink-0 mt-0.5" />
+                    <p>
+                      Your payment information is encrypted and secure. We comply with PCI DSS and never store your full
+                      card details.
                     </p>
                   </div>
                 </div>
-              </div>
-            </Card>
+              </motion.div>
+            </div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </main>
+    </div>
   );
 };
 
