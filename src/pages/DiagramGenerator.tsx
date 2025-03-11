@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { ZoomIn, ZoomOut, Download, Copy, Send, Trash2, Settings, Home, Menu, MessageSquare, Save, History, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ZoomIn, ZoomOut, Download, Copy, Send, Trash2, Settings, Home, Menu, MessageSquare, Save, History, ChevronLeft, ChevronRight, Info, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +8,14 @@ import { MermaidDiagram } from "@/components/MermaidDiagram";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarTrigger, SidebarProvider } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Mock conversation for initial state
 const initialConversation = [{
@@ -104,7 +112,7 @@ const DiagramGenerator = () => {
     });
   };
 
-  const AppSidebar = () => <Sidebar className="border-r">
+  const AppSidebar = () => <Sidebar className="border-r h-screen">
       <SidebarHeader className="px-4 py-3 border-b">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
@@ -227,6 +235,55 @@ const DiagramGenerator = () => {
                 <Save size={16} className="mr-1" />
                 Save
               </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <UserCircle size={16} />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Account Information</DialogTitle>
+                    <DialogDescription>
+                      Manage your account settings and preferences.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="flex items-center justify-between border-b pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                          <UserCircle className="h-8 w-8 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">John Doe</h4>
+                          <p className="text-sm text-muted-foreground">john.doe@example.com</p>
+                        </div>
+                      </div>
+                      <div className="bg-muted px-3 py-1 rounded-full text-xs font-medium">
+                        Pro Plan
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Credits Available</h4>
+                      <div className="flex items-center gap-2">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-primary font-bold">12</span>
+                        </div>
+                        <div>
+                          <p className="text-sm">Diagram Credits</p>
+                          <p className="text-xs text-muted-foreground">Renews on July 1, 2023</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="w-full">Profile Settings</Button>
+                      <Button variant="outline" className="w-full">Billing</Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Button variant="outline" size="sm">
                 <Settings size={16} />
               </Button>
@@ -311,16 +368,16 @@ const DiagramGenerator = () => {
           {/* Input Area - Fixed at bottom */}
           <div className="border-t p-4 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
             <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
-              <div className="relative">
+              <div className="flex flex-col gap-3">
                 <Textarea 
                   value={input} 
                   onChange={e => setInput(e.target.value)} 
                   placeholder="Enter Mermaid.js diagram code..." 
-                  className="pr-24 py-6 min-h-28 resize-none w-full" 
+                  className="py-6 min-h-28 resize-none w-full" 
                 />
                 <Button 
                   type="submit" 
-                  className="absolute right-2 bottom-2 h-10" 
+                  className="w-full md:w-auto ml-auto"
                   disabled={isLoading || !input.trim()}
                 >
                   {isLoading ? "Generating..." : <>
