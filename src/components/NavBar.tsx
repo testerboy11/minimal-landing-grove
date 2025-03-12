@@ -1,17 +1,13 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Coins, 
-  ChevronRight, 
+  Coins,
   User,
-  Settings,
-  LogOut,
-  CreditCard
 } from "lucide-react";
 import {
   Tooltip,
@@ -19,25 +15,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 const NavBar = () => {
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   // Mock user data - In a real app, this would come from your auth/user context
   const userData = {
@@ -47,19 +26,6 @@ const NavBar = () => {
     avatar: null,
     plan: "Pro Plan"
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Check if the current path matches the link
   const isActiveLink = (path: string) => {
@@ -71,12 +37,7 @@ const NavBar = () => {
 
   return (
     <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out py-4",
-        scrolled 
-          ? "bg-background/80 backdrop-blur-md border-b shadow-sm" 
-          : "bg-transparent"
-      )}
+      className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b shadow-sm py-4"
     >
       <div className="container flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
@@ -86,28 +47,26 @@ const NavBar = () => {
           <span className="font-medium text-lg transition-colors group-hover:text-primary">Simplify</span>
         </Link>
         
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-8">
           {[
             { path: "/#features", label: "Features" },
-            { path: "/#pricing", label: "Pricing" },
             { path: "/#testimonials", label: "Testimonials" },
-            { path: "/generate", label: "Generate" },
-            { path: "/#contact", label: "Contact" }
+            { path: "/#highlights", label: "Highlights" },
+            { path: "/#pricing", label: "Pricing" },
+            { path: "/#faq", label: "FAQ" },
+            { path: "/blog", label: "Blog" },
           ].map((link, i) => (
             <Link 
               key={i} 
               to={link.path} 
               className={cn(
-                "nav-link relative px-2 py-1 transition-all",
+                "text-base font-medium transition-colors",
                 isActiveLink(link.path) 
-                  ? "text-primary font-semibold" 
-                  : "hover:text-primary"
+                  ? "text-primary" 
+                  : "text-foreground/80 hover:text-foreground"
               )}
             >
               {link.label}
-              {isActiveLink(link.path) && (
-                <span className="absolute -bottom-1 left-0 h-0.5 w-full bg-primary rounded-full" />
-              )}
             </Link>
           ))}
         </nav>
@@ -118,7 +77,7 @@ const NavBar = () => {
               <TooltipTrigger asChild>
                 <Badge 
                   variant="outline" 
-                  className="flex items-center gap-1 py-1.5 px-3 border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
+                  className="hidden sm:flex items-center gap-1 py-1.5 px-3 border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
                 >
                   <Coins size={14} className="text-primary" />
                   <span className="text-sm font-medium">{userData.credits} credits</span>
@@ -133,82 +92,16 @@ const NavBar = () => {
           <ThemeToggle />
           
           <Link to="/auth">
-            <Button variant="ghost" size="sm" className="hidden md:inline-flex hover:bg-primary/10">
-              Login
+            <Button variant="ghost" size="sm" className="text-foreground/90 hover:text-foreground">
+              Sign in
             </Button>
           </Link>
           
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="animate-scale-in group relative">
-                <span className="flex items-center gap-2">
-                  <User size={16} />
-                  <span className="hidden sm:inline">Account</span>
-                </span>
-                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">Account</DialogTitle>
-                <DialogDescription>
-                  Manage your account settings and subscription.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="mt-4 space-y-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>{userData.name}</CardTitle>
-                        <CardDescription>{userData.email}</CardDescription>
-                      </div>
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        {userData.avatar ? (
-                          <img 
-                            src={userData.avatar} 
-                            alt={userData.name} 
-                            className="h-full w-full rounded-full object-cover" 
-                          />
-                        ) : (
-                          <User size={20} className="text-primary" />
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pb-3">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <Coins size={16} className="text-primary" />
-                        <span className="text-sm font-medium">{userData.credits} credits available</span>
-                      </div>
-                      <Badge variant="outline">{userData.plan}</Badge>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-2 border-t">
-                    <Link to="/checkout" className="w-full">
-                      <Button variant="outline" size="sm" className="w-full">
-                        <CreditCard size={14} className="mr-2" />
-                        Upgrade Plan
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-                
-                <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    <Settings size={14} className="mr-2" />
-                    Account Settings
-                  </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    <LogOut size={14} className="mr-2" />
-                    Sign Out
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Link to="/auth">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              Sign up
+            </Button>
+          </Link>
         </div>
       </div>
     </header>
