@@ -17,10 +17,7 @@ const NavLinks = () => {
   const links = [
     { path: "/#features", label: "Features" },
     { path: "/#testimonials", label: "Testimonials" },
-    { path: "/#highlights", label: "Highlights" },
     { path: "/#pricing", label: "Pricing" },
-    { path: "/#faq", label: "FAQ" },
-    { path: "/blog", label: "Blog" },
     { path: "/generate", label: "Generate" },
     { path: "/profile", label: "Dashboard" },
   ];
