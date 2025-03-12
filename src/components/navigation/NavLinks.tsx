@@ -21,6 +21,8 @@ const NavLinks = () => {
     { path: "/#pricing", label: "Pricing" },
     { path: "/#faq", label: "FAQ" },
     { path: "/blog", label: "Blog" },
+    { path: "/generate", label: "Generate" },
+    { path: "/profile", label: "Dashboard" },
   ];
 
   return (
