@@ -6,7 +6,7 @@ import { User } from "lucide-react";
 
 const AuthButtons = () => {
   // This is a placeholder - in a real app we'd use an auth state to determine if user is logged in
-  const isLoggedIn = true; // Changed to true for demonstration
+  const isLoggedIn = false; // Changed back to false to show login/signup buttons
 
   return (
     <>

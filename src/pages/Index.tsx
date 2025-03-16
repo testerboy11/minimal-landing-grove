@@ -12,6 +12,9 @@ import { motion } from "framer-motion";
 
 const Index = () => {
   useEffect(() => {
+    // Set dark mode by default
+    document.documentElement.classList.add('dark');
+    
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
@@ -42,7 +45,7 @@ const Index = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="overflow-hidden"
+      className="overflow-hidden dark:bg-black"
     >
       <NavBar />
       
