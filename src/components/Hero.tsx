@@ -87,14 +87,14 @@ const Hero = () => {
           </Button>
         </div>
         
-        {/* Dashboard preview image */}
+        {/* Dashboard preview image - UPDATED */}
         <div 
           className="mt-16 relative mx-auto max-w-5xl animate-slide-up opacity-0 rounded-lg overflow-hidden shadow-2xl"
           style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-30 z-10"></div>
           <img 
-            src="/lovable-uploads/4ff6d874-e81c-46af-8f4f-1bccb7bd35de.png" 
+            src="https://images.unsplash.com/photo-1531297484001-80022131f5a1" 
             alt="Dashboard Preview" 
             className="w-full h-auto object-cover"
           />
